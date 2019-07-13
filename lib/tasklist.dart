@@ -89,7 +89,7 @@ class _TaskListState extends State<TaskList> {
     print(completedList.length);
     return showDialog(
         context: context,
-        barrierDismissible: false      ,
+        barrierDismissible: false,
         builder: (BuildContext builder) {
           print(completedList.length);
           return Container(
