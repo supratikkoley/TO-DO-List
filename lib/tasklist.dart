@@ -433,6 +433,10 @@ class _TaskListState extends State<TaskList> {
   }
 
   Widget _cardListView() {
+    
+    List<Widget> completedListWidgets = 
+          completedList.map((item) => listItemTile(context, item)).toList();
+
     // this is the main widget, this widget can decide what is needed to show.
     if (taskList.length == 0 && completedList.length == 0) {
       // if this condition is true then 'emptyStateView' widget will be shown.
@@ -463,8 +467,7 @@ class _TaskListState extends State<TaskList> {
         ],
       );
     } else if (completedList.length > 0 && taskList.length == 0) {
-      List<Widget> completedListWidgets = // and the listview of the taskList.
-          completedList.map((item) => listItemTile(context, item)).toList();
+      
       return SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -483,45 +486,45 @@ class _TaskListState extends State<TaskList> {
       );
     } else {
       // if none of the above is true, then it will show the completedList tile(ExpansionTile)
-      List<Widget> completedListWidgets = // and the listview of the taskList.
-          completedList.map((item) => listItemTile(context, item)).toList();
-      return Column(
-        children: <Widget>[
-          ExpansionTile(
-            title: Text(
-              "Completed (${completedList.length})",
-              style: TextStyle(fontSize: 22.0),
+      // and the listview of the taskList.
+      return  Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text(
+                "Completed (${completedList.length})",
+                style: TextStyle(fontSize: 22.0),
+              ),
+              onExpansionChanged: null,
+              initiallyExpanded: false,
+              children: completedListWidgets,
             ),
-            onExpansionChanged: null,
-            initiallyExpanded: false,
-            children: completedListWidgets,
-          ),
 
-          SizedBox(height: 5.0),
+            SizedBox(height: 5.0),
 
-          Flexible(
-            child: ListView.builder(
-              padding: EdgeInsets.all(0.0),
-              itemCount: taskList.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Column(
-                    children: <Widget>[
-                      index == 0
-                          ? Divider(color: Colors.grey, height: 16.0)
-                          : Divider(color: Colors.transparent, height: 0.0),
-                      listItemTile(context, taskList[index]),
-                      Divider(color: Colors.grey, height: 16.0),
-                    ],
-                  ),
-                );
-              },
+            Flexible(
+              child: ListView.builder(
+                padding: EdgeInsets.all(0.0),
+                itemCount: taskList.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Column(
+                      children: <Widget>[
+                        index == 0
+                            ? Divider(color: Colors.grey, height: 16.0)
+                            : Divider(color: Colors.transparent, height: 0.0),
+                        listItemTile(context, taskList[index]),
+                        Divider(color: Colors.grey, height: 16.0),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
 
-          // completedList.length==0?null:
-        ],
+            // completedList.length==0?null:
+          ],
+        
       );
     }
   }
