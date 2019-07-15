@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './tasklist.dart';
+import 'spalsh_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         canvasColor: Colors.transparent,
       ),
-      home: TaskList(),
+      home: SplashScreen(),
     );
   }
 }

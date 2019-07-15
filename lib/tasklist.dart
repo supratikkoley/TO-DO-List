@@ -1,30 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class Item {
-  String taskName;
-  int priority;
-  bool isChecked;
-  Item({this.taskName, this.priority, this.isChecked});
-
-  Map<String,dynamic> toJsonItem()=>{
-    'taskName':taskName,
-    'priority':priority,
-    'isChecked':isChecked
-  };
-  
-  factory Item.fromJson(Map<String,dynamic> jsonbody){
-    return Item(
-      taskName: jsonbody['taskName'],
-      priority: jsonbody['priority'],
-      isChecked: jsonbody['isChecked']
-    );
-  }
-}
+import 'spalsh_screen.dart';
+import 'item.dart';
 
 class TaskList extends StatefulWidget {
-  TaskList({Key key}) : super(key: key);
+  List<Item> tasklist = [];
+  List<Item> completedTasklist = [];
+  TaskList({this.tasklist,this.completedTasklist});
 
   @override
   _TaskListState createState() => _TaskListState();
@@ -48,6 +31,7 @@ class _TaskListState extends State<TaskList> {
     super.initState();
     _loadData(); ///when the app launcehs, this method loads all the data of this app.
   }
+  
   
   /////////////////////////////////# HELPER METHODS #/////////////////////////////////////////////////////
   
