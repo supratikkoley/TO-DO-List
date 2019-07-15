@@ -18,8 +18,8 @@ class _TaskListState extends State<TaskList> {
 
   var jsonTaskList;
   var jsonCompletedList;
-  
-  bool _visible = true;
+
+  bool _visible = false;
 
   @override
   void initState() {
@@ -436,9 +436,8 @@ class _TaskListState extends State<TaskList> {
   }
 
   Widget _cardListView() {
-    
-    List<Widget> completedListWidgets = 
-          completedList.map((item) => listItemTile(context, item)).toList();
+    List<Widget> completedListWidgets =
+        completedList.map((item) => listItemTile(context, item)).toList();
 
     // this is the main widget, this widget can decide what is needed to show.
     if (taskList.length == 0 && completedList.length == 0) {
@@ -478,61 +477,59 @@ class _TaskListState extends State<TaskList> {
                 "Completed (${completedList.length})",
                 style: TextStyle(fontSize: 22.0),
               ),
-              onExpansionChanged:(val){
+              onExpansionChanged: (val) {
                 setState(() {
-                  _visible = val; 
+                  _visible = val;
                 });
                 print(_visible);
               },
               initiallyExpanded: false,
               children: completedListWidgets,
             ),
-             
-             completedTaskStateView(_visible),
+            completedTaskStateView(_visible),
           ],
         ),
       );
     } else {
       // if none of the above is true, then it will show the completedList tile(ExpansionTile)
       // and the listview of the taskList.
-      return  Column(
-          children: <Widget>[
-            ExpansionTile(
-              title: Text(
-                "Completed (${completedList.length})",
-                style: TextStyle(fontSize: 22.0),
-              ),
-              onExpansionChanged: null,
-              initiallyExpanded: false,
-              children: completedListWidgets,
+      return Column(
+        children: <Widget>[
+          ExpansionTile(
+            title: Text(
+              "Completed (${completedList.length})",
+              style: TextStyle(fontSize: 22.0),
             ),
+            onExpansionChanged: null,
+            initiallyExpanded: false,
+            children: completedListWidgets,
+          ),
 
-            SizedBox(height: 5.0),
+          SizedBox(height: 5.0),
 
-            Flexible(
-              child: ListView.builder(
-                padding: EdgeInsets.all(0.0),
-                itemCount: taskList.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Column(
-                      children: <Widget>[
-                        index == 0
-                            ? Divider(color: Colors.grey, height: 16.0)
-                            : Divider(color: Colors.transparent, height: 0.0),
-                        listItemTile(context, taskList[index]),
-                        Divider(color: Colors.grey, height: 16.0),
-                      ],
-                    ),
-                  );
-                },
-              ),
+          Flexible(
+            child: ListView.builder(
+              padding: EdgeInsets.all(0.0),
+              itemCount: taskList.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Column(
+                    children: <Widget>[
+                      index == 0
+                          ? Divider(color: Colors.grey, height: 16.0)
+                          : Divider(color: Colors.transparent, height: 0.0),
+                      listItemTile(context, taskList[index]),
+                      Divider(color: Colors.grey, height: 16.0),
+                    ],
+                  ),
+                );
+              },
             ),
+          ),
 
-            // completedList.length==0?null:
-          ],
-        
+          // completedList.length==0?null:
+        ],
       );
     }
   }
@@ -565,14 +562,13 @@ class _TaskListState extends State<TaskList> {
   }
 
   Widget completedTaskStateView(bool visible) {
-    print(visible); 
+    print(visible);
     return AnimatedOpacity(
-        opacity:  visible? 0.0 : 1.0,
-        duration: Duration(milliseconds: 250),
-          child: Container(
-            child: Column(
-        
-        children: <Widget>[
+      opacity: visible ? 0.0 : 1.0,
+      duration: Duration(milliseconds: 250),
+      child: Container(
+        child: Column(
+          children: <Widget>[
             SizedBox(
               height: 68.0,
             ),
@@ -607,9 +603,9 @@ class _TaskListState extends State<TaskList> {
                 ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
-          ),
     );
   }
 }
