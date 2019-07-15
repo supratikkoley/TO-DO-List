@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
-// import 'completedList.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Item {
   String taskName;
   int priority;
   bool isChecked;
   Item({this.taskName, this.priority, this.isChecked});
+
+  Map<String,dynamic> toJsonItem()=>{
+    'taskName':taskName,
+    'priority':priority,
+    'isChecked':isChecked
+  };
+  
+  factory Item.fromJson(Map<String,dynamic> jsonbody){
+    return Item(
+      taskName: jsonbody['taskName'],
+      priority: jsonbody['priority'],
+      isChecked: jsonbody['isChecked']
+    );
+  }
 }
 
 class TaskList extends StatefulWidget {
@@ -16,49 +31,68 @@ class TaskList extends StatefulWidget {
 }
 
 class _TaskListState extends State<TaskList> {
-  void _showBottomSheet() {
-    showModalBottomSheet(
-        context: context,
-        builder: (builder) {
-          return Container(
-            height: 100.0,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10.0),
-                  topRight: Radius.circular(10.0)),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: FlatButton(
-                    onPressed: completedList.length == 0
-                        ? null
-                        : _deleteAllCompletedTask,
-                          
-                    child: Text("Delete all Completed Tasks"),
-                  ),
-                )
-              ],
-            ),
-          );
-        });
-  }
 
   final taskNameController = TextEditingController();
   final priorityController = TextEditingController();
 
-  List<Item> taskList = List();
+  List<Item> taskList = [];
 
   List<Item> completedList = [];
 
+  var jsonTaskList;
+  var jsonCompletedList;
+  
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+  
+  _saveValues() async {
+    
+    jsonTaskList  = jsonEncode(taskList.map((e)=>e.toJsonItem()).toList());
+    jsonCompletedList =  jsonEncode(completedList.map((e)=>e.toJsonItem()).toList());
+    print(jsonTaskList.runtimeType);
+    print(jsonCompletedList.runtimeType);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('taskList', jsonTaskList);
+    prefs.setString('completedList', jsonCompletedList);
+    
+  }
+
+  _loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    jsonTaskList = prefs.getString('taskList') ?? null;
+    jsonCompletedList = prefs.getString('completedList') ?? null;
+    print(jsonTaskList);
+    print(jsonTaskList.runtimeType);
+    if(jsonTaskList==null)
+      taskList = [];
+    else{
+      Iterable jsonbody = json.decode(jsonTaskList);
+      print(jsonbody);
+      print(jsonbody.runtimeType);
+      setState(() {
+        taskList = jsonbody.map((e)=>Item.fromJson(e)).toList();
+        print(taskList);        
+      });
+    }
+
+    if(jsonCompletedList==null)
+      completedList = [];
+    else{
+      Iterable jsonbody = json.decode(jsonCompletedList);
+      setState(() {
+        completedList = jsonbody.map((e)=>Item.fromJson(e)).toList();        
+      });
+    }
+  }
+
+  
   _appendItem(Item item) {
     print(taskList.length);
     setState(() {
-      // print(listKey.currentState);
 
       taskList.add(item);
 
@@ -67,61 +101,29 @@ class _TaskListState extends State<TaskList> {
   }
 
   _insertItem(int index, Item item) {
-    setState(() {
+    setState(() { 
       taskList.insert(index, item);
       print(taskList.length);
     });
   }
 
-  _removeItem(Item item) {
+  _removeTask(Item item) {
     setState(() {
       completedList.insert(0, item);
       taskList.remove(item);
       print(taskList.length);
+      
     });
-
+    
+    _saveValues();
+    
     print("completed list length: ${completedList.length}");
+    print(jsonTaskList.toString());
+    print(jsonCompletedList.toString());
+    
   }
 
-  Future _deleteAllCompletedTask() async {
-    print("completed length ${completedList.length}");
-    Navigator.of(context).pop();
-    print(completedList.length);
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext builder) {
-          print(completedList.length);
-          return Container(
-            child: AlertDialog(
-              title: Text("Delete all completed tasks?"),
-              content: Text(
-                  "There is ${completedList.length} completed task that will be permanently removed."),
-              actions: <Widget>[
-                FlatButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Cancel", style: TextStyle(fontSize: 16.0)),
-                ),
-                FlatButton(
-                  onPressed: () {
-                    setState(() {
-                      completedList.clear();
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    "Delete",
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
-  }
-
+  
   void _addTask(Item item) {
     // print(item);
     int flag = 0;
@@ -133,7 +135,7 @@ class _TaskListState extends State<TaskList> {
       bool isChecked = false;
       item = Item(taskName: taskName, priority: priority, isChecked: isChecked);
     } else {
-      print("compl#######$item");
+      print(item);
     }
 
     int length = taskList.length;
@@ -169,6 +171,9 @@ class _TaskListState extends State<TaskList> {
       Navigator.of(context).pop();
     }
     debugPrint(taskList.toString());
+    jsonTaskList  = jsonEncode(taskList.map((e)=>e.toJsonItem()).toList());
+    _saveValues();
+    print(jsonTaskList.toString());
   }
 
   void _showForm(BuildContext context) {
@@ -223,6 +228,85 @@ class _TaskListState extends State<TaskList> {
           );
         });
   }
+
+  
+  void _showBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            height: 100.0,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10.0),
+                  topRight: Radius.circular(10.0)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FlatButton(
+                    onPressed: completedList.length == 0
+                        ? null
+                        : _deleteAllCompletedTask,
+                          
+                    child: Text("Delete all Completed Tasks"),
+                  ),
+                )
+              ],
+            ),
+          );
+        });
+  }
+
+  Future _deleteAllCompletedTask() async {
+    print("completed length ${completedList.length}");
+    Navigator.of(context).pop();
+    print(completedList.length);
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext builder) {
+          print(completedList.length);
+          return Container(
+            child: AlertDialog(
+              title: Text("Delete all completed tasks?"),
+              content: Text(
+                  "There is ${completedList.length} completed task that will be permanently removed.",
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Cancel", style: TextStyle(fontSize: 16.0)),
+                ),
+                FlatButton(
+                  onPressed: () {
+                    setState(() {
+                      completedList.clear();
+                    });
+                    _saveValues();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "Delete",
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +385,7 @@ class _TaskListState extends State<TaskList> {
             setState(() {
               item.isChecked = true;
               Future.delayed(Duration(milliseconds: 350), () {
-                _removeItem(item);
+                _removeTask(item);
               });
             });
           } else {
@@ -314,7 +398,7 @@ class _TaskListState extends State<TaskList> {
                   completedList.remove(item);
                 });
               });
-              // completedList.remove(item);
+          
               print(completedList);
               print("completd list length ${completedList.length}");
             });
@@ -338,7 +422,6 @@ class _TaskListState extends State<TaskList> {
     } else if (completedList.length == 0 && taskList.length > 0) {
       return Column(
         mainAxisSize: MainAxisSize.min,
-        // mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Flexible(
@@ -366,9 +449,6 @@ class _TaskListState extends State<TaskList> {
       List<Widget> completedListWidgets =
           completedList.map((item) => listItemTile(context, item)).toList();
       return Column(
-        // mainAxisSize: MainAxisSize.min,
-        // mainAxisAlignment: MainAxisAlignment.end,
-        // crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ExpansionTile(
             title: Text(
@@ -381,7 +461,7 @@ class _TaskListState extends State<TaskList> {
           ),
 
           SizedBox(height: 5.0),
-          // Divider(color: Colors.grey, height: 16.0),
+
           Flexible(
             child: ListView.builder(
               padding: EdgeInsets.all(0.0),
