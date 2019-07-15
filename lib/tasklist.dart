@@ -304,6 +304,11 @@ class _TaskListState extends State<TaskList> {
                     setState(() {
                       completedList.clear();
                     });
+                    if(_visible==true){
+                      setState(() {
+                        _visible =false; 
+                      });
+                    }
                     _saveValues();
                     Navigator.of(context).pop();
                   },
