@@ -44,39 +44,49 @@ class _TaskListState extends State<TaskList> {
   
   
   @override
-  void initState() {
+  void initState() {    
     super.initState();
-    _loadData();
+    _loadData(); ///when the app launcehs, this method loads all the data of this app.
   }
   
-  _saveValues() async {
-    
+  /////////////////////////////////# HELPER METHODS #/////////////////////////////////////////////////////
+  
+  _saveValues() async {  // this method create jsonArray of two list and by using sharedpreferance saves
+                          // all the data of two lists into the local storage.          
     jsonTaskList  = jsonEncode(taskList.map((e)=>e.toJsonItem()).toList());
     jsonCompletedList =  jsonEncode(completedList.map((e)=>e.toJsonItem()).toList());
-    print(jsonTaskList.runtimeType);
-    print(jsonCompletedList.runtimeType);
+    
+    print(jsonTaskList.runtimeType);   //for debug pupose
+    print(jsonCompletedList.runtimeType); //for debug pupose
+    
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('taskList', jsonTaskList);
-    prefs.setString('completedList', jsonCompletedList);
-    
-  }
+    prefs.setString('completedList', jsonCompletedList);  //save key-value pairs in local storage.
+  
+  } // End of _saveValues()
 
-  _loadData() async {
+  _loadData() async {  // this method loads all the data from the local stoarge.
+    
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    jsonTaskList = prefs.getString('taskList') ?? null;
-    jsonCompletedList = prefs.getString('completedList') ?? null;
-    print(jsonTaskList);
+    jsonTaskList = prefs.getString('taskList') ?? null;           // if there is no data, jsonTaskList will be
+    jsonCompletedList = prefs.getString('completedList') ?? null; // assigned to null.
+    
+    print(jsonTaskList);          // for debug purpose
     print(jsonTaskList.runtimeType);
+    
     if(jsonTaskList==null)
       taskList = [];
     else{
       Iterable jsonbody = json.decode(jsonTaskList);
+      
       print(jsonbody);
-      print(jsonbody.runtimeType);
+      print(jsonbody.runtimeType); //debug purpose
+      
       setState(() {
-        taskList = jsonbody.map((e)=>Item.fromJson(e)).toList();
-        print(taskList);        
+        taskList = jsonbody.map((e)=>Item.fromJson(e)).toList(); // this line creates the list of Item(object) from
+        print(taskList);                                         // the Json which was fetched from local storage.
       });
+    
     }
 
     if(jsonCompletedList==null)
@@ -87,10 +97,11 @@ class _TaskListState extends State<TaskList> {
         completedList = jsonbody.map((e)=>Item.fromJson(e)).toList();        
       });
     }
-  }
+  
+  } //End of _loadData()
 
   
-  _appendItem(Item item) {
+  _appendItem(Item item) { // It helps the _addTask() method to add the item at the end of the list.
     print(taskList.length);
     setState(() {
 
@@ -100,14 +111,16 @@ class _TaskListState extends State<TaskList> {
     });
   }
 
-  _insertItem(int index, Item item) {
+  _insertItem(int index, Item item) { // It helps the _addTask() method to insert the item at the desired index 
+                                    // of the list.
     setState(() { 
       taskList.insert(index, item);
       print(taskList.length);
     });
+
   }
 
-  _removeTask(Item item) {
+  _removeTask(Item item) {  // 
     setState(() {
       completedList.insert(0, item);
       taskList.remove(item);
@@ -124,13 +137,12 @@ class _TaskListState extends State<TaskList> {
   }
 
   
-  void _addTask(Item item) {
-    // print(item);
-    int flag = 0;
-
-    if (item == null) {
+  void _addTask(Item item) {// In this function I applied the task inserting algorithm, So this funtion
+                            // will add the task into the task list in the right order.
+    int flag = 0;           // and also when this function is called, it store the data of two lists into the
+    if (item == null) {     // local storage.
       flag = 1;
-      String taskName = taskNameController.text;
+      String taskName = taskNameController.text;        
       int priority = int.parse(priorityController.text);
       bool isChecked = false;
       item = Item(taskName: taskName, priority: priority, isChecked: isChecked);
@@ -139,8 +151,8 @@ class _TaskListState extends State<TaskList> {
     }
 
     int length = taskList.length;
-
     print(item.taskName);
+    
     if (length == 0) {
       _appendItem(item);
     } else if (length == 1) {
@@ -165,20 +177,23 @@ class _TaskListState extends State<TaskList> {
         }
       }
     }
-    if (flag == 1) {
+
+    if (flag == 1) {    //if the flag is 1, it will clear the form and pop out from the form.
       taskNameController.clear();
       priorityController.clear();
       Navigator.of(context).pop();
     }
+
     debugPrint(taskList.toString());
-    jsonTaskList  = jsonEncode(taskList.map((e)=>e.toJsonItem()).toList());
+    
     _saveValues();
+
     print(jsonTaskList.toString());
   }
 
-  void _showForm(BuildContext context) {
-    showDialog(
-        context: context,
+  void _showForm(BuildContext context) { //this function show a form in which user have to
+        showDialog(                      //give the task name and priority of that task, when,
+        context: context,                //user hit the save button this function add the task into the taskList.
         builder: (context) {
           return Container(
             child: AlertDialog(
@@ -230,7 +245,7 @@ class _TaskListState extends State<TaskList> {
   }
 
   
-  void _showBottomSheet() {
+  void _showBottomSheet() { // it will show a bottom sheet where user can delete all completed task.
     showModalBottomSheet(
         context: context,
         builder: (builder) {
@@ -262,8 +277,8 @@ class _TaskListState extends State<TaskList> {
         });
   }
 
-  Future _deleteAllCompletedTask() async {
-    print("completed length ${completedList.length}");
+  Future _deleteAllCompletedTask() async {              //This method helps to delete all the completed tasks 
+    print("completed length ${completedList.length}"); // after getting permission from user.
     Navigator.of(context).pop();
     print(completedList.length);
     return showDialog(
@@ -306,10 +321,10 @@ class _TaskListState extends State<TaskList> {
         });
   }
 
-
+////////////////////////////////////////////# End of  HELPER METHODS #/////////////////////////////////////////
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return Scaffold(
       appBar: AppBar(
         leading: Icon(Icons.event_note, color: Colors.blue[700]),
@@ -331,10 +346,13 @@ class _TaskListState extends State<TaskList> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: customBottomAppBar(),
     );
-  }
+  
+  } //End of main widget builder.
 
-  Widget _customFloatingButton() {
-    return FloatingActionButton(
+//////////////////////////////////////// # HELPER WIDGETS #///////////////////////////////////////////////////////////////
+
+  Widget _customFloatingButton() { // custom floating button, if users press this button, it will open a form[by _showForm() method]
+    return FloatingActionButton(   // where user will enter taskname and its priority and can save the task into the list.
       focusElevation: 10.0,
       foregroundColor: Colors.white,
       backgroundColor: Colors.blue[500],
@@ -347,7 +365,7 @@ class _TaskListState extends State<TaskList> {
     );
   }
 
-  Widget customBottomAppBar() {
+  Widget customBottomAppBar() {  //it has a menu button which can open a bottomSheet where user can delete all the completed task.
     return BottomAppBar(
       shape: CircularNotchedRectangle(),
       notchMargin: 5.0,
@@ -373,16 +391,16 @@ class _TaskListState extends State<TaskList> {
     );
   }
 
-  Widget listItemTile(BuildContext context, Item item) {
+  Widget listItemTile(BuildContext context, Item item) { // this is the widget for one list Item, How one item will look
     return ListTile(
       dense: true,
-      leading: Checkbox(
-        tristate: true,
+      leading: Checkbox( // by ticking this checkbox, user can can convert a task to a complted task 
+        tristate: true,  //and add the task to the completedTaskList.
         activeColor: Colors.blue[500],
         value: item.isChecked,
         onChanged: (value) {
-          if (item.isChecked == false) {
-            setState(() {
+          if (item.isChecked == false) { // if chekbox is not ticked,
+            setState(() {               // here, it will be ticked and removed from the task list
               item.isChecked = true;
               Future.delayed(Duration(milliseconds: 350), () {
                 _removeTask(item);
@@ -392,14 +410,14 @@ class _TaskListState extends State<TaskList> {
             setState(() {
               item.isChecked = false;
 
-              Future.delayed(Duration(milliseconds: 350), () {
-                _addTask(item);
+              Future.delayed(Duration(milliseconds: 350), () { // if the task is in completedTaskList,
+                _addTask(item);         // by ticking the checkbox the task will be added to the taskList.
                 setState(() {
                   completedList.remove(item);
                 });
               });
           
-              print(completedList);
+              print(completedList); //for debug purposes
               print("completd list length ${completedList.length}");
             });
           }
@@ -416,10 +434,10 @@ class _TaskListState extends State<TaskList> {
     );
   }
 
-  Widget _cardListView() {
-    if (taskList.length == 0 && completedList.length == 0) {
+  Widget _cardListView() {                                      // this is the main widget, this widget can decide what is needed to show.
+    if (taskList.length == 0 && completedList.length == 0) { // if this condition is true then 'emptyStateView' widget will be shown.
       return emptyStateView();
-    } else if (completedList.length == 0 && taskList.length > 0) {
+    } else if (completedList.length == 0 && taskList.length > 0) {// if this condition is true then, only listview will be shown. 
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -441,12 +459,10 @@ class _TaskListState extends State<TaskList> {
               },
             ),
           ),
-
-          // completedList.length==0?null:
         ],
       );
-    } else {
-      List<Widget> completedListWidgets =
+    } else {  // if none of the above is true, then it will show the completedList tile(ExpansionTile)
+      List<Widget> completedListWidgets =                          // and the listview of the taskList.
           completedList.map((item) => listItemTile(context, item)).toList();
       return Column(
         children: <Widget>[
@@ -489,7 +505,7 @@ class _TaskListState extends State<TaskList> {
     }
   }
 
-  Widget emptyStateView() {
+  Widget emptyStateView() { // this widget return a emptystate view( a fancy image and some text).
     return Align(
       alignment: Alignment.topCenter,
       child: SingleChildScrollView(
