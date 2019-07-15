@@ -18,10 +18,13 @@ class _TaskListState extends State<TaskList> {
 
   var jsonTaskList;
   var jsonCompletedList;
+  
+  bool _visible = true;
 
   @override
   void initState() {
     super.initState();
+
     _loadData();
 
     ///when the app launcehs, this method loads all the data of this app.
@@ -103,7 +106,7 @@ class _TaskListState extends State<TaskList> {
   }
 
   _removeTask(Item item) {
-    //
+    // remove task from the taskList and add that task into the compltedTaskList.
     setState(() {
       completedList.insert(0, item);
       taskList.remove(item);
@@ -467,7 +470,6 @@ class _TaskListState extends State<TaskList> {
         ],
       );
     } else if (completedList.length > 0 && taskList.length == 0) {
-      
       return SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -476,11 +478,17 @@ class _TaskListState extends State<TaskList> {
                 "Completed (${completedList.length})",
                 style: TextStyle(fontSize: 22.0),
               ),
-              onExpansionChanged: null,
+              onExpansionChanged:(val){
+                setState(() {
+                  _visible = val; 
+                });
+                print(_visible);
+              },
               initiallyExpanded: false,
               children: completedListWidgets,
             ),
-            completedTaskStateView(),
+             
+             completedTaskStateView(_visible),
           ],
         ),
       );
@@ -556,44 +564,52 @@ class _TaskListState extends State<TaskList> {
     );
   }
 
-  Widget completedTaskStateView() {
-    return Column(
-      children: <Widget>[
-        SizedBox(
-          height: 75.0,
-        ),
-        Image.asset(
-          "images/relax.png",
-          height: 180.0,
-          fit: BoxFit.fitWidth,
-        ),
-        SizedBox(
-          height: 35.0,
-        ),
-        Center(
-          child: Column(
-            children: <Widget>[
-              Text(
-                "Nicely done !!!",
-                style: TextStyle(
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.w200,
-                    color: Colors.black),
+  Widget completedTaskStateView(bool visible) {
+    print(visible); 
+    return AnimatedOpacity(
+        opacity:  visible? 0.0 : 1.0,
+        duration: Duration(milliseconds: 250),
+          child: Container(
+            child: Column(
+        
+        children: <Widget>[
+            SizedBox(
+              height: 68.0,
+            ),
+            Image.asset(
+              "images/relax.png",
+              height: 180.0,
+              fit: BoxFit.fitWidth,
+            ),
+            SizedBox(
+              height: 35.0,
+            ),
+            Center(
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    "Nicely done !!!",
+                    style: TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.black),
+                  ),
+                  SizedBox(
+                    height: 14.0,
+                  ),
+                  Text(
+                    "want to add more task ?",
+                    style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w300),
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 14.0,
-              ),
-              Text(
-                "want to add more task?",
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w300),
-              ),
-            ],
+            ),
+        ],
+      ),
           ),
-        ),
-      ],
     );
   }
 }
