@@ -112,7 +112,11 @@ class _TaskListState extends State<TaskList> {
       taskList.remove(item);
       print(taskList.length);
     });
-
+    if(taskList.length==0 && _visible==true){
+      setState(() {
+        _visible = false; 
+      });
+    }
     _saveValues();
 
     print("completed list length: ${completedList.length}");
@@ -565,7 +569,7 @@ class _TaskListState extends State<TaskList> {
     print(visible);
     return AnimatedOpacity(
       opacity: visible ? 0.0 : 1.0,
-      duration: Duration(milliseconds: 250),
+      duration: Duration(milliseconds: 350),
       child: Container(
         child: Column(
           children: <Widget>[
