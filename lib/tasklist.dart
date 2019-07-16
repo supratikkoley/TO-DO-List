@@ -124,7 +124,7 @@ class _TaskListState extends State<TaskList> {
     print(jsonCompletedList.toString());
   }
 
-  Future _deleteTask(Item item) async{
+  Future _deleteTask(Item item) async {
     //This method delete task permanently from the taskList.
     Navigator.of(context).pop();
     print(completedList.length);
@@ -151,7 +151,7 @@ class _TaskListState extends State<TaskList> {
                 ),
                 FlatButton(
                   onPressed: () {
-                    if(item.isChecked==true){
+                    if (item.isChecked == true) {
                       setState(() {
                         completedList.remove(item);
                       });
@@ -159,9 +159,8 @@ class _TaskListState extends State<TaskList> {
                       setState(() {
                         taskList.remove(item);
                       });
-                      
                     }
-                    
+
                     _saveValues();
                     Navigator.of(context).pop();
                   },
@@ -292,7 +291,7 @@ class _TaskListState extends State<TaskList> {
         });
   }
 
-  void _showBottomSheet(int flag,Item item) {
+  void _showBottomSheet(int flag, Item item) {
     // it will show a bottom sheet where user can delete all completed task.
     showModalBottomSheet(
         context: context,
@@ -311,25 +310,23 @@ class _TaskListState extends State<TaskList> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: flag==0?FlatButton(
-                    onPressed: completedList.length == 0
-                        ? null
-                        : _deleteAllCompletedTask,
-                    child: Text("Delete all Completed Tasks"),
-                  ):
-                  FlatButton(
-                    onPressed: (){
-                      if(item.isChecked==false){
-                        if(taskList.length != 0)
-                          _deleteTask(item);
-                      } else {
-                        _deleteTask(item);
-                      }
-                      
-                    },
-                    child: Text("Delete this Tasks"),
-                  ),
-                  
+                  child: flag == 0
+                      ? FlatButton(
+                          onPressed: completedList.length == 0
+                              ? null
+                              : _deleteAllCompletedTask,
+                          child: Text("Delete all Completed Tasks"),
+                        )
+                      : FlatButton(
+                          onPressed: () {
+                            if (item.isChecked == false) {
+                              if (taskList.length != 0) _deleteTask(item);
+                            } else {
+                              _deleteTask(item);
+                            }
+                          },
+                          child: Text("Delete this Tasks"),
+                        ),
                 )
               ],
             ),
@@ -449,7 +446,8 @@ class _TaskListState extends State<TaskList> {
           children: <Widget>[
             IconButton(
                 onPressed: () {
-                  _showBottomSheet(0,null); //when menu icon will be clicked, a bottosheet will appear where user can find
+                  _showBottomSheet(0,
+                      null); //when menu icon will be clicked, a bottosheet will appear where user can find
                 }, // the all completed task delete option.
                 icon: Icon(
                   Icons.menu,
@@ -465,7 +463,7 @@ class _TaskListState extends State<TaskList> {
     // this is the widget for one list Item, How one item will look
     return ListTile(
       dense: true,
-      onLongPress: ()=>_showBottomSheet(1, item),
+      onLongPress: () => _showBottomSheet(1, item),
       leading: Checkbox(
         // by ticking this checkbox, user can can convert a task to a complted task
         tristate: true, //and add the task to the completedTaskList.
@@ -545,6 +543,7 @@ class _TaskListState extends State<TaskList> {
         ],
       );
     } else if (completedList.length > 0 && taskList.length == 0) {
+      // if this condition is true, only expansiontile(completedList) & taskList will be shown.
       return SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -569,43 +568,43 @@ class _TaskListState extends State<TaskList> {
     } else {
       // if none of the above is true, then it will show the completedList tile(ExpansionTile)
       // and the listview of the taskList.
-      return Column(
-        children: <Widget>[
-          ExpansionTile(
-            title: Text(
-              "Completed (${completedList.length})",
-              style: TextStyle(fontSize: 22.0),
-            ),
-            onExpansionChanged: null,
-            initiallyExpanded: false,
-            children: completedListWidgets,
-          ),
-
-          SizedBox(height: 5.0),
-
-          Flexible(
-            child: ListView.builder(
-              padding: EdgeInsets.all(0.0),
-              itemCount: taskList.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Column(
-                    children: <Widget>[
-                      index == 0
-                          ? Divider(color: Colors.grey, height: 16.0)
-                          : Divider(color: Colors.transparent, height: 0.0),
-                      listItemTile(context, taskList[index]),
-                      Divider(color: Colors.grey, height: 16.0),
-                    ],
+      return Container(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildListDelegate([
+                ExpansionTile(
+                  title: Text(
+                    "Completed (${completedList.length})",
+                    style: TextStyle(fontSize: 22.0),
                   ),
-                );
-              },
-            ),
-          ),
-
-          // completedList.length==0?null:
-        ],
+                  onExpansionChanged: null,
+                  initiallyExpanded: false,
+                  children: completedListWidgets,
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.all(0.0),
+                  itemCount: taskList.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Column(
+                        children: <Widget>[
+                          index == 0
+                              ? Divider(color: Colors.grey, height: 16.0)
+                              : Divider(color: Colors.transparent, height: 0.0),
+                          listItemTile(context, taskList[index]),
+                          Divider(color: Colors.grey, height: 16.0),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ]),
+            )
+          ],
+        ),
       );
     }
   } //End of _cardListView()
@@ -642,7 +641,7 @@ class _TaskListState extends State<TaskList> {
     print(visible);
     return AnimatedOpacity(
       opacity: visible ? 0.0 : 1.0,
-      duration: Duration(milliseconds: 350),
+      duration: Duration(milliseconds: 450),
       child: Container(
         child: Column(
           children: <Widget>[
