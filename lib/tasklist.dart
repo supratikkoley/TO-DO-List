@@ -112,9 +112,9 @@ class _TaskListState extends State<TaskList> {
       taskList.remove(item);
       print(taskList.length);
     });
-    if(taskList.length==0 && _visible==true){
+    if (taskList.length == 0 && _visible == true) {
       setState(() {
-        _visible = false; 
+        _visible = false;
       });
     }
     _saveValues();
@@ -122,6 +122,58 @@ class _TaskListState extends State<TaskList> {
     print("completed list length: ${completedList.length}");
     print(jsonTaskList.toString());
     print(jsonCompletedList.toString());
+  }
+
+  Future _deleteTask(Item item) async{
+    //This method delete task permanently from the taskList.
+    Navigator.of(context).pop();
+    print(completedList.length);
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext builder) {
+          print(completedList.length);
+          return Container(
+            child: AlertDialog(
+              title: Text("Delete this tasks?"),
+              content: Text(
+                "This task will be permanently removed.",
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Cancel", style: TextStyle(fontSize: 16.0)),
+                ),
+                FlatButton(
+                  onPressed: () {
+                    if(item.isChecked==true){
+                      setState(() {
+                        completedList.remove(item);
+                      });
+                    } else {
+                      setState(() {
+                        taskList.remove(item);
+                      });
+                      
+                    }
+                    
+                    _saveValues();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "Delete",
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   void _addTask(Item item) {
@@ -184,10 +236,10 @@ class _TaskListState extends State<TaskList> {
 
   void _showForm(BuildContext context) {
     //this function show a form in which user have to
+    //give the task name and priority of that task, when,
+    //user hit the save button this function add the task into the taskList.
     showDialog(
-        //give the task name and priority of that task, when,
-        context:
-            context, //user hit the save button this function add the task into the taskList.
+        context: context,
         builder: (context) {
           return Container(
             child: AlertDialog(
@@ -240,7 +292,7 @@ class _TaskListState extends State<TaskList> {
         });
   }
 
-  void _showBottomSheet() {
+  void _showBottomSheet(int flag,Item item) {
     // it will show a bottom sheet where user can delete all completed task.
     showModalBottomSheet(
         context: context,
@@ -259,12 +311,25 @@ class _TaskListState extends State<TaskList> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: FlatButton(
+                  child: flag==0?FlatButton(
                     onPressed: completedList.length == 0
                         ? null
                         : _deleteAllCompletedTask,
                     child: Text("Delete all Completed Tasks"),
+                  ):
+                  FlatButton(
+                    onPressed: (){
+                      if(item.isChecked==false){
+                        if(taskList.length != 0)
+                          _deleteTask(item);
+                      } else {
+                        _deleteTask(item);
+                      }
+                      
+                    },
+                    child: Text("Delete this Tasks"),
                   ),
+                  
                 )
               ],
             ),
@@ -304,9 +369,9 @@ class _TaskListState extends State<TaskList> {
                     setState(() {
                       completedList.clear();
                     });
-                    if(_visible==true){
+                    if (_visible == true) {
                       setState(() {
-                        _visible =false; 
+                        _visible = false;
                       });
                     }
                     _saveValues();
@@ -342,7 +407,8 @@ class _TaskListState extends State<TaskList> {
           ),
         ),
       ),
-      body: _cardListView(),
+      body:
+          _cardListView(), //this widget will decide what to show on body in different states of the app
       backgroundColor: Colors.white,
       floatingActionButton: _customFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
@@ -383,8 +449,8 @@ class _TaskListState extends State<TaskList> {
           children: <Widget>[
             IconButton(
                 onPressed: () {
-                  _showBottomSheet();
-                },
+                  _showBottomSheet(0,null); //when menu icon will be clicked, a bottosheet will appear where user can find
+                }, // the all completed task delete option.
                 icon: Icon(
                   Icons.menu,
                   color: Colors.blue[500],
@@ -399,6 +465,7 @@ class _TaskListState extends State<TaskList> {
     // this is the widget for one list Item, How one item will look
     return ListTile(
       dense: true,
+      onLongPress: ()=>_showBottomSheet(1, item),
       leading: Checkbox(
         // by ticking this checkbox, user can can convert a task to a complted task
         tristate: true, //and add the task to the completedTaskList.
@@ -442,13 +509,13 @@ class _TaskListState extends State<TaskList> {
         style: TextStyle(fontSize: 20.0),
       ),
     );
-  }
+  } //End of listItemTile()
 
   Widget _cardListView() {
+    // this is the main widget, this widget can decide what is needed to show.
     List<Widget> completedListWidgets =
         completedList.map((item) => listItemTile(context, item)).toList();
 
-    // this is the main widget, this widget can decide what is needed to show.
     if (taskList.length == 0 && completedList.length == 0) {
       // if this condition is true then 'emptyStateView' widget will be shown.
       return emptyStateView();
@@ -541,7 +608,7 @@ class _TaskListState extends State<TaskList> {
         ],
       );
     }
-  }
+  } //End of _cardListView()
 
   Widget emptyStateView() {
     // this widget return a emptystate view(a fancy image and some text).
@@ -568,9 +635,10 @@ class _TaskListState extends State<TaskList> {
         ),
       ),
     );
-  }
+  } //End of emptyStateView()
 
   Widget completedTaskStateView(bool visible) {
+    // when all tasks get completed, this widget will be shown.
     print(visible);
     return AnimatedOpacity(
       opacity: visible ? 0.0 : 1.0,
@@ -616,5 +684,5 @@ class _TaskListState extends State<TaskList> {
         ),
       ),
     );
-  }
+  } // End of completedTaskStateView()
 }
