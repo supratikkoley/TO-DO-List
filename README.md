@@ -1,9 +1,6 @@
 # TO-DO-List App
 
-## Youtube link :
-
-
-[![Todo-List App](https://i9.ytimg.com/vi/mBfli6kkHH4/mq2.jpg?sqp=COiJuOkF&rs=AOn4CLBN2lldx96M0EHmLHOBPq0-0bw6pA)](https://www.youtube.com/watch?v=mBfli6kkHH4)
+## Youtube link : [![Todo-List App](http://img.youtube.com/vi/Bfli6kkHH4/0.jpg)](https://www.youtube.com/watch?v=mBfli6kkHH4)
 
 
 ## Screenshots
